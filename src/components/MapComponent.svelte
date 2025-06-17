@@ -78,8 +78,8 @@
   <!-- [WIP] dev -->
   <MapLibre
     {style}
-    center={[36.69151817162813, 34.74914069288191]}
-    zoom={16}
+    center={[38.92639132951913, 47.21577626335991]}
+    zoom={4}
     interactive={true}
     attributionControl={false}
     bind:map
@@ -101,21 +101,21 @@
               'raster-opacity': overlayImagesOpacity,
             }} />
         </ImageSource>
-        {/key}
+      {/key}
         
-        <Marker
-          class="marker marker_image"
-          bind:lngLat={image.topLeft}
-          draggable
-        >
-        </Marker>  
+      <Marker
+        class="marker marker_image"
+        bind:lngLat={image.topLeft}
+        draggable
+      >
+      </Marker>  
 
-        <Marker
-          class="marker marker_image"
-          bind:lngLat={image.bottomRight}
-          draggable
-        >
-        </Marker>  
+      <Marker
+        class="marker marker_image"
+        bind:lngLat={image.bottomRight}
+        draggable
+      >
+      </Marker>  
     {/each}
 
     {#each pointsArray as coords}

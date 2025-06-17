@@ -25,6 +25,7 @@
   let overlayImages = $state([])
   let copyStatusArray = $state([])
   let overlayImagesOpacity = $state(1)
+  let isOptionsPanelOpen = $state(true)
 
   let inputPointCoords = $state('')
   let pointsArray = $state([])
@@ -65,6 +66,10 @@
     sources,
     layers,
   })
+
+  const toggleOptionsPanel = () => {
+    isOptionsPanelOpen = !isOptionsPanelOpen
+  }
 
   const handleImageUrlSubmit = () => {
     if (!inputImageUrl) return;
@@ -130,10 +135,16 @@
       copyStatusArray[index] = false 
     }, 2000)
   }
+
+  let optionsClassList = $derived([
+    'options',
+    isOptionsPanelOpen ? 'options_open' : 'options_closed'
+  ])
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+
 <div>
   <MapComponent 
     bind:this={mapComponentRef} 
@@ -143,103 +154,108 @@
     {style}
   ></MapComponent>
 
-  <div class="options">
-    <div class="options__item">
-      <p class="options__title">Images</p>
-      <div class="options__input">
-        <input
-          type="url"
-          placeholder="URL de l'image"
-          bind:value={inputImageUrl}
-        />
-        <button onclick={handleImageUrlSubmit}>Valider</button>
+  <div class={optionsClassList.join(' ')}>
+    <div class="options__toggle">
+      <p onclick={toggleOptionsPanel}>
+        {isOptionsPanelOpen ? 'Masquer' : 'Afficher'}
+      </p>
+    </div>
+    <div class="options__panel">
+      <div class="options__item">
+        <p class="options__title">Images</p>
+        <div class="options__input">
+          <input
+            type="url"
+            placeholder="URL de l'image"
+            bind:value={inputImageUrl}
+          />
+          <button onclick={handleImageUrlSubmit}>Valider</button>
+        </div>
+  
+        {#if overlayImages.length > 0}
+          <div class="options__list">
+            {#each overlayImages as image, index}
+              {@const classList = ['list__item']}
+              <div class={classList.join(' ')}>
+                <p class="list__remove" onclick={() => removeImage(index)}>
+                  <CloseIcon />
+                </p>
+                <p class="list__name">{getFileName(image.src)}</p>
+                <p class="list__copy" onclick={() => getImageCoordinates(index)}>
+                  {#if copyStatusArray[index] === true}
+                    <CheckIcon />
+                  {:else}
+                    <CopyIcon />
+                  {/if}
+                </p>
+              </div>
+            {/each}
+          </div>
+        {/if}
+  
+        {#if overlayImages.length > 0}
+          <div>
+            <label>
+              Opacité
+              <input 
+                type="range" 
+                min="0"
+                max="1" 
+                step="0.1"
+                bind:value={overlayImagesOpacity} 
+              />
+            </label>
+          </div>
+        {/if}
       </div>
-
-      {#if overlayImages.length > 0}
-        <div class="options__list">
-          {#each overlayImages as image, index}
-            {@const classList = ['list__item']}
-            <div class={classList.join(' ')}>
-              <p class="list__remove" onclick={() => removeImage(index)}>
-                <CloseIcon />
-              </p>
-              <p class="list__name">{getFileName(image.src)}</p>
-              <p class="list__copy" onclick={() => getImageCoordinates(index)}>
-                {#if copyStatusArray[index] === true}
-                  <CheckIcon />
-                {:else}
-                  <CopyIcon />
-                {/if}
-              </p>
-            </div>
-          {/each}
+  
+      <div class="options__item">
+        <p class="options__title">Points</p>
+        <div class="options__input">
+          <input
+            type="url"
+            placeholder="Latitude, longitude"
+            bind:value={inputPointCoords}
+          />
+          <button onclick={handlePointCoordsSubmit}>Valider</button>
         </div>
-      {/if}
-
-      {#if overlayImages.length > 0}
-        <div>
-          <label>
-            Opacité
-            <input 
-              type="range" 
-              min="0"
-              max="1" 
-              step="0.1"
-              bind:value={overlayImagesOpacity} 
-            />
-          </label>
-        </div>
-      {/if}
-    </div>
-
-    <div class="options__item">
-      <p class="options__title">Points</p>
-      <div class="options__input">
-        <input
-          type="url"
-          placeholder="Latitude, longitude"
-          bind:value={inputPointCoords}
-        />
-        <button onclick={handlePointCoordsSubmit}>Valider</button>
+  
+        {#if pointsArray.length > 0}
+          <div class="options__list">
+            {#each pointsArray as coords, index}
+              {@const classList = ['list__item']}
+              <div class={classList.join(' ')}>
+                <p class="list__remove" onclick={() => removePoint(index)}>
+                  <CloseIcon />
+                </p>
+                <p class="list__name">{coords}</p>
+              </div>
+            {/each}
+          </div>
+        {/if}
       </div>
-
-      {#if pointsArray.length > 0}
-        <div class="options__list">
-          {#each pointsArray as coords, index}
-            {@const classList = ['list__item']}
-            <div class={classList.join(' ')}>
-              <p class="list__remove" onclick={() => removePoint(index)}>
-                <CloseIcon />
-              </p>
-              <p class="list__name">{coords}</p>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
-
-    <div class="options__item">
-      <!-- <button onclick={toggleSatelliteLayer}>Toggle couche satellite</button> -->
-
-      <label>
-        <input 
-          type="checkbox" 
-          bind:checked={isSatelliteLayerVisible}
-        />
-        Couche satellite
-      </label>
-    </div>
-
-    <div class="options__item">
-      <label>
-        Zoomer sur
-        <input
-          type="text"
-          placeholder="Latitude, longitude"
-          bind:value={inputCoords}
-          onkeydown={handleCoordsInputKeydown}
-        />
-      </label>
+  
+      <div class="options__item">
+        <label>
+          <input 
+            type="checkbox" 
+            bind:checked={isSatelliteLayerVisible}
+          />
+          Couche satellite
+        </label>
+      </div>
+  
+      <div class="options__item">
+        <label>
+          Zoomer sur
+          <input
+            type="text"
+            placeholder="Latitude, longitude"
+            bind:value={inputCoords}
+            onkeydown={handleCoordsInputKeydown}
+          />
+        </label>
+      </div>
     </div>
   </div>
 </div>
@@ -254,10 +270,30 @@
     position: absolute;
     top: 24px;
     left: 24px;
+    width: 300px;
+  }
+
+  .options__toggle {
+    font-family: monospace;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+    color: #ffffff;
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .options__panel {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    width: 300px;
+    transition: opacity 400ms ease-in-out, transform 400ms ease-in-out;
+  }
+
+  .options.options_closed .options__panel {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-20%);
   }
 
   .options input[type="url"],
