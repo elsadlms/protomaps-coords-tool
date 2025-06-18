@@ -1,6 +1,8 @@
 <script>
-  import { executeOnEnter, getFileName } from './utils'
+  import { copyToClipboard, executeOnEnter, getFileName } from './utils'
   import { CheckIcon, CloseIcon, CopyIcon } from './icons'
+
+  import CopyToClipboardButton from './CopyToClipboardButton.svelte'
 
   let { 
     onSubmitImageUrl,
@@ -12,6 +14,11 @@
     overlayImages,
     copyStatusArray,
     pointsArray,
+    mapZoom,
+    mapLat,
+    mapLng,
+    mouseLat,
+    mouseLng,
     overlayImagesOpacity = $bindable(1),
     isSatelliteLayerVisible = $bindable(true),
   } = $props()
@@ -36,6 +43,11 @@
     onSubmitZoomCoords(inputZoomCoords); 
   }
 
+  const copyMapCoordsToClipboard = () => {
+    const toCopy = `center: [${mapLng}, ${mapLat}], zoom: ${mapZoom},`
+    copyToClipboard(toCopy)
+  }
+
   const toggleOptionsPanel = () => {
     isOptionsPanelOpen = !isOptionsPanelOpen
   }
@@ -47,6 +59,7 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 
 <div class={optionsClassList.join(' ')}>
@@ -57,6 +70,16 @@
   </div>
 
   <div class="options__panel">
+    <div class="options__item">
+      <label>
+        <input 
+          type="checkbox" 
+          bind:checked={isSatelliteLayerVisible}
+        />
+        Couche satellite
+      </label>
+    </div>
+
     <div class="options__item">
       <p class="options__title">Images</p>
       <div class="options__input">
@@ -72,35 +95,33 @@
       </div>
 
       {#if overlayImages.length > 0}
-        <div class="options__list">
+        <div class="options__subitems options__subitems_list">
           {#each overlayImages as image, index}
-            {@const classList = ['list__item']}
+            {@const classList = ['options__subitem']}
             <div class={classList.join(' ')}>
-              <p class="list__remove" onclick={() => onRemoveImage(index)}>
+              <p class="options__icon-btn options__icon-btn_remove" onclick={() => onRemoveImage(index)}>
                 <CloseIcon />
               </p>
-              <p class="list__name">{getFileName(image.src)}</p>
-              <p class="list__copy" onclick={() => onGetImageCoordinates(index)}>
-                {#if copyStatusArray[index] === true}
-                  <CheckIcon />
-                {:else}
-                  <CopyIcon />
-                {/if}
-              </p>
+              <p class="options__subcontent">{getFileName(image.src)}</p>
+              <div class="options__icon-btn options__icon-btn_copy">
+                <CopyToClipboardButton
+                  callbackFunction={() => onGetImageCoordinates(index)}
+                />
+              </div>
             </div>
           {/each}
         </div>
       {/if}
 
       {#if overlayImages.length > 0}
-        <div>
+        <div class="options__slider options__slider_opacity">
           <label>
             Opacité
             <input 
               type="range" 
               min="0"
               max="1" 
-              step="0.1"
+              step="0.02"
               bind:value={overlayImagesOpacity} 
             />
           </label>
@@ -123,14 +144,14 @@
       </div>
 
       {#if pointsArray.length > 0}
-        <div class="options__list">
+        <div class="options__subitems options__subitems_list">
           {#each pointsArray as coords, index}
-            {@const classList = ['list__item']}
+            {@const classList = ['options__subitem']}
             <div class={classList.join(' ')}>
-              <p class="list__remove" onclick={() => onRemovePoint(index)}>
+              <p class="options__icon-btn options__icon-btn_remove" onclick={() => onRemovePoint(index)}>
                 <CloseIcon />
               </p>
-              <p class="list__name">{coords}</p>
+              <p class="options__subcontent">{coords}</p>
             </div>
           {/each}
         </div>
@@ -153,20 +174,51 @@
     </div>
 
     <div class="options__item">
-      <label>
-        <input 
-          type="checkbox" 
-          bind:checked={isSatelliteLayerVisible}
-        />
-        Couche satellite
-      </label>
+      <p class="options__title">Coordonnées</p>
+      <div class="options__subitems">
+        <div class="options__subitem options__subitem_map">
+          <div class="options__icon-btn options__icon-btn_copy">
+            <CopyToClipboardButton
+              callbackFunction={copyMapCoordsToClipboard}
+            />
+          </div>
+          <p class="options__subtitle">
+            Map
+          </p>
+          <div class="options__subcontent">
+            <span>
+              lat: {mapLat.toFixed(4)}
+            </span>
+            <span>
+              lng: {mapLng.toFixed(4)}
+            </span>
+            <span>
+              zoom: {mapZoom.toFixed(2)}x
+            </span>
+          </div>
+        </div>
+        <div class="options__subitem options__subitem_mouse">
+          <p class="options__subtitle">
+            Mouse
+          </p>
+          <div class="options__subcontent">
+            <span>
+              lat: {mouseLat.toFixed(4)}
+            </span>
+            <span>
+              lng: {mouseLng.toFixed(4)}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <style lang="scss">
   .options {
-    --options-c-background: #ffffffa1;
+    --options-c-background: #ffffff8f;
+    --options-c-text: var(--c-black);
     --options-c-border: #ffffff91;
     --options-c-button-hover: #ffffff55;
     --options-c-divider-light: rgba(0, 0, 0, 0.2);
@@ -176,7 +228,7 @@
     top: 24px;
     left: 24px;
     width: 300px;
-    color: var(--c-black);
+    color: var(--options-c-text);
   }
 
   .options__toggle {
@@ -212,6 +264,9 @@
     border-radius: 2px;
     border: unset;
     border-bottom: 1px solid var(--options-c-divider-dark);
+    background: var(--options-c-background);
+    font-family: monospace;
+    font-size: 12px;
   }
 
   .options label:has(input) {
@@ -220,10 +275,19 @@
     align-items: center;
   }
 
+  .options label:has(input[type="range"]) {
+    gap: 12px;
+  }
+
   .options input[type="url"],
   .options input[type="text"],
   .options input[type="range"] {
     flex-grow: 1;
+  }
+
+  // .options input[type="range"],
+  .options input[type="checkbox"] {
+    accent-color: var(--c-black);
   }
 
   .options button {
@@ -270,58 +334,70 @@
     gap: 6px;
     margin: 6px 0 0 0;
     overflow: hidden;
+    font-size: 12px;
   }
 
-  .options__list + div {
+  .options__subitems {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .options__input + .options__subitems {
     margin-top: 12px;
   }
 
-  .list__item {
-    display: contents;
+  .options__slider.options__slider_opacity {
+    margin-top: 12px; 
   }
 
-  .list__item::after {
-    content: "";
-    display: block;
-    border-top: 1px solid var(--options-c-divider-light);
-    grid-column: span 3;
+  .options__subitem {
+    background-color: var(--options-c-background);
+    border-radius: 2px;
+    padding: 4px 8px;
+    position: relative;
   }
 
-  .list__item:first-child::before {
-    content: "";
-    display: block;    
-    border-top: 1px solid var(--options-c-divider-dark);
-    grid-column: span 3;
-  }
-
-  .list__item:last-child::after {
-    border-top: 1px solid var(--options-c-divider-dark);
-  }
-
-  .list__name {
-    font-family: monospace;
-  }
-
-  .list__copy,
-  .list__remove {
-    height: 24px;
-    width: 24px;
+  .options__subitems.options__subitems_list .options__subitem {
     display: flex;
     align-items: center;
-    justify-content: center;
-    align-self: flex-end;
-    border-radius: 2px;
-    background-color: transparent;
+    gap: 6px;
+  }
+
+  .options__subitems.options__subitems_list .options__icon-btn.options__icon-btn_copy {
+    margin-left: auto;
+  }
+
+  .options__subtitle {
+    font-family: monospace;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  .options__subcontent {
+    display: flex;
+    flex-direction: column;
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  .options__icon-btn {
+    display: flex;
     cursor: pointer;
-    transition: background-color 200ms;
+    opacity: 0.4;
   }
 
-  .list__copy:hover,
-  .list__remove:hover {
-    background-color: var(--options-c-button-hover);
+  .options__icon-btn:hover {
+    opacity: 0.8;
   }
 
-  input[type="checkbox"] {
-    accent-color: var(--c-black);
+  .options__subitem.options__subitem_map .options__icon-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 8px;
+    z-index: 1;
   }
 </style>

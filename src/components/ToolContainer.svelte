@@ -27,6 +27,12 @@
   let isSatelliteLayerVisible = $state(true)
   let targetCoords = $state([])
 
+  let mapZoom = $state(0)
+  let mapLat = $state(0)
+  let mapLng = $state(0)
+  let mouseLat = $state(0)
+  let mouseLng = $state(0)
+
   // [WIP] move map style to another file
   const sources = {
     protomaps: {
@@ -84,8 +90,6 @@
 
   const handleSubmitZoomCoords = (coords) => {
     if (!coords) return;
-
-    console.log(coords)
     
     const cleanCoords = getCoordsArrayFromString(coords)
     targetCoords = [cleanCoords[1], cleanCoords[0]]
@@ -107,22 +111,25 @@
     const selectedImage = overlayImages[index]
     console.log(getFileName(selectedImage.src))
     const imageCoords = getFormattedCoords(selectedImage.topLeft, selectedImage.bottomRight)
-
     copyToClipboard(imageCoords)
-    copyStatusArray[index] = true
-
-    setTimeout(() => {
-      copyStatusArray[index] = false 
-    }, 2000)
   }
+
+  let containerClassList = $derived([
+    'container',
+  ])
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 
-<div class="container">
+<div class={containerClassList.join(' ')}>
   <Map 
-    bind:this={mapComponentRef} 
+    bind:this={mapComponentRef}
+    bind:mapZoom={mapZoom}
+    bind:mapLat={mapLat}
+    bind:mapLng={mapLng}
+    bind:mouseLat={mouseLat}
+    bind:mouseLng={mouseLng}
     bind:overlayImages={overlayImages}
     {overlayImagesOpacity}
     {pointsArray}
@@ -139,14 +146,59 @@
     {overlayImages}
     {copyStatusArray}
     {pointsArray}
+    {mapZoom}
+    {mapLat}
+    {mapLng}
+    {mouseLat}
+    {mouseLng}
     bind:overlayImagesOpacity={overlayImagesOpacity}
     bind:isSatelliteLayerVisible={isSatelliteLayerVisible}
   />
+
+  <div class="reference">
+    <div class="reference__cross"></div>
+  </div>
 </div>
 
 <style lang="scss">
   .container {
     --c-black: #18191d;
+  }
+
+  .reference {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .reference__cross {
+    position: relative;
+  }
+
+  .reference__cross::before,
+  .reference__cross::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1px;
+    height: 18px;
+    background-color: #ffffff91;
+    transform-origin: center;
+  }
+
+  .reference__cross::before {
+    transform: translate(-50%, -50%);
+  }
+
+  .reference__cross::after {
+    transform: translate(-50%, -50%) rotate(90deg);
   }
 
   .overlay {

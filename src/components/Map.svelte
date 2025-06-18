@@ -11,19 +11,21 @@
 
   import { copyToClipboard, getFormattedCoords } from './utils'
 
-  import CoordinatesDashboard from './CoordinatesDashboard.svelte'
-
-  let { style, overlayImages = $bindable(), overlayImagesOpacity, pointsArray } = $props()
+  let { 
+    style, 
+    overlayImages = $bindable(), 
+    overlayImagesOpacity, 
+    pointsArray,
+    mapZoom = $bindable(),
+    mapLat = $bindable(),
+    mapLng = $bindable(),
+    mouseLat = $bindable(),
+    mouseLng = $bindable(),
+  } = $props()
 
   let markerOnClickEnabled = false
 
   let map = $state()
-  let mapZoom = $state(0)
-  let mapLat = $state(0)
-  let mapLng = $state(0)
-
-  let mouseLat = $state(0)
-  let mouseLng = $state(0)
 
   let markers = $state([])
   
@@ -67,14 +69,6 @@
 </script>
 
 <div>
-  <CoordinatesDashboard
-    {mapZoom}
-    {mapLat}
-    {mapLng}
-    {mouseLat}
-    {mouseLng}
-  ></CoordinatesDashboard>
-
   <!-- [WIP] dev -->
   <MapLibre
     {style}
