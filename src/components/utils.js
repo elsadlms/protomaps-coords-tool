@@ -8,15 +8,21 @@ const copyToClipboard = (content) => {
   })
 }
 
+const executeOnEnter = (event, callbackFn, args = {}) => {
+  if (event.key === 'Enter') {
+    callbackFn(args)
+  }
+}
+
 const getFileName = (url) => {
   return url.split('/').at(-1)
 }
 
 const getCoordsArrayFromString = (coordsString) => {
-  const cleanCoords = coordsString.trim()
-  const first = cleanCoords.split(' ')[0].replace(',', '').trim()
-  const sec = cleanCoords.split(' ')[1].trim()
-  return [first, sec]
+  return coordsString
+    .split(',')
+    .map(coord => parseFloat(coord.trim()))
+    .filter(n => !isNaN(n));
 }
 
 const getFormattedCoords = (topLeft, bottomRight) => {
@@ -39,6 +45,7 @@ const isImage = (url) => {
 
 export {
   copyToClipboard,
+  executeOnEnter,
   getCoordsArrayFromString,
   getFileName,
   getFormattedCoords,
