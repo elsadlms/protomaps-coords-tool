@@ -34,7 +34,6 @@
 
   const submitZoomCoords = () => { 
     onSubmitZoomCoords(inputZoomCoords); 
-    inputZoomCoords = ''; 
   }
 
   const toggleOptionsPanel = () => {
@@ -113,8 +112,8 @@
       <p class="options__title">Points</p>
       <div class="options__input">
         <input
-          type="url"
-          placeholder="Latitude, longitude"
+          type="text"
+          placeholder="lat, lng"
           bind:value={inputPointCoords}
           onkeypress={(e) => executeOnEnter(e, submitPointCoords)}
         />
@@ -139,6 +138,21 @@
     </div>
 
     <div class="options__item">
+      <p class="options__title">Zoomer sur</p>
+      <div class="options__input">
+        <input
+          type="text"
+          placeholder="lat, lng"
+          bind:value={inputZoomCoords}
+          onkeypress={(e) => executeOnEnter(e, submitZoomCoords)}
+        />
+        <button onclick={submitZoomCoords}>
+          Valider
+        </button>      
+      </div>
+    </div>
+
+    <div class="options__item">
       <label>
         <input 
           type="checkbox" 
@@ -147,35 +161,22 @@
         Couche satellite
       </label>
     </div>
-
-    <div class="options__item">
-      <label>
-        Zoomer sur
-        <input
-          type="text"
-          placeholder="Latitude, longitude"
-          bind:value={inputZoomCoords}
-          onkeypress={(e) => executeOnEnter(e, submitZoomCoords)}
-        />
-      </label>
-      <button onclick={submitZoomCoords}>
-        Valider
-      </button>
-    </div>
   </div>
 </div>
 
 <style lang="scss">
   .options {
-    --options-background: #ffffff99;
-    --options-button-hover: #ffffff55;
-    --options-border-light: rgba(0, 0, 0, 0.2);
-    --options-border-dark: rgba(0, 0, 0, 0.6);
+    --options-c-background: #ffffffa1;
+    --options-c-border: #ffffff91;
+    --options-c-button-hover: #ffffff55;
+    --options-c-divider-light: rgba(0, 0, 0, 0.2);
+    --options-c-divider-dark: rgba(0, 0, 0, 0.6);
     z-index: 2;
     position: absolute;
     top: 24px;
     left: 24px;
     width: 300px;
+    color: var(--c-black);
   }
 
   .options__toggle {
@@ -186,12 +187,16 @@
     color: #ffffff;
     margin-bottom: 12px;
     letter-spacing: 0.1em;
+    width: fit-content;
+    padding: 2px 8px;
+    background: var(--c-black);
+    border-radius: 4px;
   }
 
   .options__panel {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     transition: opacity 400ms ease-in-out, transform 400ms ease-in-out;
   }
 
@@ -206,7 +211,7 @@
     padding: 6px;
     border-radius: 2px;
     border: unset;
-    border-bottom: 1px solid var(--options-border-dark);
+    border-bottom: 1px solid var(--options-c-divider-dark);
   }
 
   .options label:has(input) {
@@ -228,19 +233,27 @@
   }
 
   .options button:hover {
-    background-color: var(--options-button-hover);
+    background-color: var(--options-c-button-hover);
   }
 
   .options__item {
-    background: var(--options-background);
+    background: var(--options-c-background);
     backdrop-filter: blur(8px);
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 4px;
+    padding: 8px;
+    border: 1px solid var(--options-c-border);
+    font-size: 14px;
+  }
+
+  .options__item label {
+    font-weight: 700;
+    font-family: monospace;
   }
 
   .options__title {
     font-weight: 700;
     margin-bottom: 6px;
+    font-family: monospace;
   }
 
   .options__input {
@@ -270,19 +283,19 @@
   .list__item::after {
     content: "";
     display: block;
-    border-top: 1px solid var(--options-border-light);
+    border-top: 1px solid var(--options-c-divider-light);
     grid-column: span 3;
   }
 
   .list__item:first-child::before {
     content: "";
     display: block;    
-    border-top: 1px solid var(--options-border-dark);
+    border-top: 1px solid var(--options-c-divider-dark);
     grid-column: span 3;
   }
 
   .list__item:last-child::after {
-    border-top: 1px solid var(--options-border-dark);
+    border-top: 1px solid var(--options-c-divider-dark);
   }
 
   .list__name {
@@ -305,6 +318,10 @@
 
   .list__copy:hover,
   .list__remove:hover {
-    background-color: var(--options-button-hover);
+    background-color: var(--options-c-button-hover);
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--c-black);
   }
 </style>

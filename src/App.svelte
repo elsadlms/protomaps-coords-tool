@@ -1,9 +1,9 @@
 <script lang="ts">
-  import MapContainer from './components/MapContainer.svelte'
+  import ToolContainer from './components/ToolContainer.svelte'
 </script>
 
 <main>
-  <MapContainer />
+  <ToolContainer />
 </main>
 
 <style>

@@ -4,7 +4,7 @@
 
   import { copyToClipboard, getCoordsArrayFromString, getFileName, getFormattedCoords, isImage } from './utils'
 
-  import MapComponent from './MapComponent.svelte'
+  import Map from './Map.svelte'
   import OptionsPanel from './OptionsPanel.svelte'
 
   const createImageOverlayObject = (url) => {
@@ -120,31 +120,35 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 
-<div>
-  <MapComponent 
+<div class="container">
+  <Map 
     bind:this={mapComponentRef} 
     bind:overlayImages={overlayImages}
     {overlayImagesOpacity}
     {pointsArray}
     {style}
-  ></MapComponent>
+  ></Map>
 
   <OptionsPanel 
     onSubmitImageUrl={handleSubmitImageUrl}
     onRemoveImage={removeImage}
     onGetImageCoordinates={getImageCoordinates}
-    {overlayImages}
-    {copyStatusArray}
-    bind:overlayImagesOpacity={overlayImagesOpacity}
     onSubmitPointCoords={handleSubmitPointCoords}
     onSubmitZoomCoords={handleSubmitZoomCoords}
-    {pointsArray}
     onRemovePoint={removePoint}
+    {overlayImages}
+    {copyStatusArray}
+    {pointsArray}
+    bind:overlayImagesOpacity={overlayImagesOpacity}
     bind:isSatelliteLayerVisible={isSatelliteLayerVisible}
   />
 </div>
 
 <style lang="scss">
+  .container {
+    --c-black: #18191d;
+  }
+
   .overlay {
     height: 100vh;
     width: 100vw;
