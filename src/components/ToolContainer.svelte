@@ -1,6 +1,5 @@
 <script>
-  import { getTheme } from './theme'
-  import { getNoLabelsLayers } from './layers'
+  import { getMapStyle } from './mapConfig'
 
   import { copyToClipboard, getCoordsArrayFromString, getFileName, getFormattedCoords, isImage } from './utils'
 
@@ -21,7 +20,6 @@
 
   let mapComponentRef = null
   let overlayImages = $state([])
-  let copyStatusArray = $state([])
   let overlayImagesOpacity = $state(1)
   let pointsArray = $state([])
   let isSatelliteLayerVisible = $state(true)
@@ -33,45 +31,17 @@
   let mouseLat = $state(0)
   let mouseLng = $state(0)
 
-  // [WIP] move map style to another file
-  const sources = {
-    protomaps: {
-      maxzoom: 15,
-      type: 'vector',
-      tiles: ['https://stg-protomap.8080.lemonde.io/20240111/{z}/{x}/{y}.mvt'],
-    },
-    satellite: {
-      type: 'raster',
-      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-      tileSize: 256,
-    }
-  }
-
-  // const layers = getNoLabelsLayers('protomaps', getTheme())
-  const layers = $derived([
-    ...getNoLabelsLayers('protomaps', getTheme()),
-    {
-      id: 'satellite-layer',
-      type: 'raster',
-      source: 'satellite',
-      paint: {
-        'raster-opacity': isSatelliteLayerVisible ? 1 : 0,
-      },
-    }
-  ])
-
-  const style = $derived({
-    version: 8,
-    sources,
-    layers,
-  })
+  const mapStyle = $derived(
+    getMapStyle({
+      satellite: isSatelliteLayerVisible
+    })
+  )
 
   const handleSubmitImageUrl = (url) => {
     if (!url) return;
     if (!isImage(url)) return;
 
     overlayImages.push(createImageOverlayObject(url))
-    copyStatusArray.push(false)
   }
 
   const handleSubmitPointCoords = (coords) => {
@@ -133,7 +103,7 @@
     bind:overlayImages={overlayImages}
     {overlayImagesOpacity}
     {pointsArray}
-    {style}
+    style={mapStyle}
   ></Map>
 
   <OptionsPanel 
@@ -144,7 +114,6 @@
     onSubmitZoomCoords={handleSubmitZoomCoords}
     onRemovePoint={removePoint}
     {overlayImages}
-    {copyStatusArray}
     {pointsArray}
     {mapZoom}
     {mapLat}

@@ -9,7 +9,8 @@
     ImageSource
   } from 'svelte-maplibre'
 
-  import { copyToClipboard, getFormattedCoords } from './utils'
+  import { mapConfig } from './mapConfig.js'
+  import { copyToClipboard, getFormattedCoords } from './utils.js'
 
   let { 
     style, 
@@ -72,8 +73,8 @@
   <!-- [WIP] dev -->
   <MapLibre
     {style}
-    center={[38.92639132951913, 47.21577626335991]}
-    zoom={4}
+    center={mapConfig.center}
+    zoom={mapConfig.zoom}
     interactive={true}
     attributionControl={false}
     bind:map

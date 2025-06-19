@@ -12,7 +12,6 @@
     onSubmitZoomCoords,
     onRemovePoint,
     overlayImages,
-    copyStatusArray,
     pointsArray,
     mapZoom,
     mapLat,
